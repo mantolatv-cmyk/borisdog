@@ -63,7 +63,7 @@ export default function Home() {
             Plataforma Gratuita de Inglês
           </div>
           <h1 className="hero-title">
-            Aprenda Inglês com o seu amigo{" "}
+            Welcome Enzo! Learn English with your friend{" "}
             <span className="hero-title-accent">Boris</span>
           </h1>
           <p className="hero-subtitle">
