@@ -1221,6 +1221,7 @@ function TrueOrFalseTab({ scenario }: { scenario: ScenarioData }) {
   const [answered, setAnswered] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [complete, setComplete] = useState(false);
+  const [showPt, setShowPt] = useState(false);
 
   const initGame = useCallback(() => {
     const qs: { statement: string; statementPt: string; correct: boolean; explanation?: string }[] = [];
@@ -1228,42 +1229,40 @@ function TrueOrFalseTab({ scenario }: { scenario: ScenarioData }) {
 
     // 1. Generate A2 Vocabulary & Sentence Structure Questions
     vocab.forEach((v, i) => {
+      // Question 1: Translation/Meaning
       if (i % 2 === 0) {
-        // TRUE A2 Level Sentence
-        const isSpelling = i % 4 === 0;
-        if (isSpelling) {
+        qs.push({
+          statement: `In English, the word "${v.word}" corresponds to "${v.pt}" in Portuguese.`,
+          statementPt: `Em inglês, a palavra "${v.word}" corresponde a "${v.pt}" em português.`,
+          correct: true,
+          explanation: `Correct! "${v.word}" means "${v.pt}".`,
+        });
+      } else {
+        const wrongV = vocab[(i + 2) % vocab.length];
+        qs.push({
+          statement: `In English, the word "${v.word}" corresponds to "${wrongV.pt}" in Portuguese.`,
+          statementPt: `Em inglês, a palavra "${v.word}" corresponde a "${wrongV.pt}" em português.`,
+          correct: false,
+          explanation: `False! "${v.word}" means "${v.pt}", while "${wrongV.word}" means "${wrongV.pt}".`,
+        });
+      }
+
+      // Question 2: Spelling/Letter
+      if (v.word.length >= 3) {
+        if (i % 3 === 0) {
           qs.push({
             statement: `The English word "${v.word}" begins with the letter '${v.word[0].toUpperCase()}'.`,
             statementPt: `A palavra em inglês "${v.word}" começa com a letra '${v.word[0].toUpperCase()}'.`,
             correct: true,
             explanation: `Correct! "${v.word}" begins with '${v.word[0].toUpperCase()}'.`,
           });
-        } else {
-          qs.push({
-            statement: `In English, the word "${v.word}" corresponds to "${v.pt}" in Portuguese.`,
-            statementPt: `Em inglês, a palavra "${v.word}" corresponde a "${v.pt}" em português.`,
-            correct: true,
-            explanation: `Correct! "${v.word}" means "${v.pt}".`,
-          });
-        }
-      } else {
-        // FALSE A2 Level Sentence
-        const wrongV = vocab[(i + 2) % vocab.length];
-        const isWrongLetter = i % 3 === 0;
-        if (isWrongLetter && v.word.length > 2) {
-          const wrongLetter = String.fromCharCode(((v.word.charCodeAt(0) - 65 + 5) % 26) + 65);
+        } else if (i % 3 === 1) {
+          const wrongLetter = String.fromCharCode(((v.word.charCodeAt(0) - 65 + 7) % 26) + 65);
           qs.push({
             statement: `The English word "${v.word}" begins with the letter '${wrongLetter}'.`,
             statementPt: `A palavra em inglês "${v.word}" começa com a letra '${wrongLetter}'.`,
             correct: false,
             explanation: `False! "${v.word}" begins with '${v.word[0].toUpperCase()}', not '${wrongLetter}'.`,
-          });
-        } else {
-          qs.push({
-            statement: `In English, the word "${v.word}" corresponds to "${wrongV.pt}" in Portuguese.`,
-            statementPt: `Em inglês, a palavra "${v.word}" corresponde a "${wrongV.pt}" em português.`,
-            correct: false,
-            explanation: `False! "${v.word}" means "${v.pt}", while "${wrongV.word}" means "${wrongV.pt}".`,
           });
         }
       }
@@ -1290,14 +1289,16 @@ function TrueOrFalseTab({ scenario }: { scenario: ScenarioData }) {
       });
     }
 
-    // Shuffle and select 8 A2 questions
-    const shuffled = qs.sort(() => Math.random() - 0.5).slice(0, 8);
+    // Shuffle and select 15 A2 questions
+    const targetCount = Math.min(15, qs.length);
+    const shuffled = qs.sort(() => Math.random() - 0.5).slice(0, targetCount);
     setQuestions(shuffled);
     setQIndex(0);
     setScore(0);
     setAnswered(false);
     setFeedback("");
     setComplete(false);
+    setShowPt(false);
   }, [scenario]);
 
   useEffect(() => {
@@ -1322,6 +1323,7 @@ function TrueOrFalseTab({ scenario }: { scenario: ScenarioData }) {
         setQIndex((q) => q + 1);
         setAnswered(false);
         setFeedback("");
+        setShowPt(false);
       } else {
         setComplete(true);
       }
@@ -1370,7 +1372,16 @@ function TrueOrFalseTab({ scenario }: { scenario: ScenarioData }) {
       <div className="tf-statement-card">
         <div className="tf-statement-tag">Statement {qIndex + 1} of {questions.length}</div>
         <p className="tf-statement-text">&ldquo;{q.statement}&rdquo;</p>
-        <p className="tf-statement-pt">🇧🇷 {q.statementPt}</p>
+        
+        {showPt ? (
+          <p className="tf-statement-pt" onClick={() => setShowPt(false)} style={{ cursor: "pointer" }}>
+            🇧🇷 {q.statementPt} <span style={{ opacity: 0.6, fontSize: "0.8rem" }}>(click to hide)</span>
+          </p>
+        ) : (
+          <button className="tf-translation-btn" onClick={() => setShowPt(true)}>
+            💡 Reveal Translation
+          </button>
+        )}
       </div>
 
       <div className="game-options" style={{ maxWidth: "440px", margin: "1.5rem auto 0", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
