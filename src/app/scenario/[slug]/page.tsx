@@ -718,23 +718,64 @@ function TellMeTab({ scenario }: { scenario: ScenarioData }) {
 // Tab: Find the Mistake
 // ================================================
 function FindMistakeTab({ scenario }: { scenario: ScenarioData }) {
-  const [questions] = useState(() => {
-    if (scenario.findMistakeQuestions && scenario.findMistakeQuestions.length > 0) {
-      return [...scenario.findMistakeQuestions].sort(() => Math.random() - 0.5);
-    }
-    return scenario.vocabulary.map((v, i) => {
-      const wrong = scenario.vocabulary[(i + 3) % scenario.vocabulary.length];
-      return {
-        emoji: v.emoji,
-        wrongEn: `I can use a ${v.word} as a ${wrong.word}!`,
-        correctEn: `No, a ${v.word} (${v.pt}) is used for its own purpose!`,
-        pt: `Mistura incorreta: ${v.word} (${v.pt}) não é ${wrong.word} (${wrong.pt})!`,
-      };
-    });
-  });
+  const [questions, setQuestions] = useState<
+    { emoji: string; wrongEn: string; correctEn: string; pt: string }[]
+  >([]);
   const [qIndex, setQIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [complete, setComplete] = useState(false);
+
+  const initGame = useCallback(() => {
+    const pool: { emoji: string; wrongEn: string; correctEn: string; pt: string }[] = [];
+
+    // 1. Curated questions if available
+    if (scenario.findMistakeQuestions && scenario.findMistakeQuestions.length > 0) {
+      pool.push(...scenario.findMistakeQuestions);
+    }
+
+    // 2. Dynamic mistake generators to ensure at least 15 items
+    const vocab = [...scenario.vocabulary];
+    vocab.forEach((v, i) => {
+      const wrong = vocab[(i + 3) % vocab.length];
+      const wrong2 = vocab[(i + 5) % vocab.length];
+
+      pool.push({
+        emoji: v.emoji,
+        wrongEn: `I can use a "${v.word}" as a "${wrong.word}".`,
+        correctEn: `No! A "${v.word}" (${v.pt}) cannot be used as a "${wrong.word}" (${wrong.pt}).`,
+        pt: `Mistura incorreta: ${v.word} não é ${wrong.word}!`,
+      });
+
+      pool.push({
+        emoji: v.emoji,
+        wrongEn: `In English, the word "${v.word}" means "${wrong2.pt}" in Portuguese.`,
+        correctEn: `No! "${v.word}" actually translates to "${v.pt}", not "${wrong2.pt}".`,
+        pt: `Tradução incorreta: "${v.word}" significa "${v.pt}"!`,
+      });
+
+      if (v.word.length >= 3) {
+        const wrongLetter = String.fromCharCode(((v.word.charCodeAt(0) - 65 + 6) % 26) + 65);
+        pool.push({
+          emoji: v.emoji,
+          wrongEn: `The English word "${v.word}" starts with the letter '${wrongLetter}'.`,
+          correctEn: `No! "${v.word}" begins with '${v.word[0].toUpperCase()}', not '${wrongLetter}'.`,
+          pt: `Letra inicial incorreta: "${v.word}" começa com '${v.word[0].toUpperCase()}'.`,
+        });
+      }
+    });
+
+    // Shuffle and pick 15 questions
+    const targetCount = Math.min(15, pool.length);
+    const selected = pool.sort(() => Math.random() - 0.5).slice(0, targetCount);
+    setQuestions(selected);
+    setQIndex(0);
+    setShowAnswer(false);
+    setComplete(false);
+  }, [scenario]);
+
+  useEffect(() => {
+    initGame();
+  }, [initGame]);
 
   const nextQuestion = () => {
     setShowAnswer(false);
@@ -746,10 +787,10 @@ function FindMistakeTab({ scenario }: { scenario: ScenarioData }) {
   };
 
   const restart = () => {
-    setQIndex(0);
-    setShowAnswer(false);
-    setComplete(false);
+    initGame();
   };
+
+  if (questions.length === 0) return null;
 
   if (complete) {
     return (
@@ -757,7 +798,7 @@ function FindMistakeTab({ scenario }: { scenario: ScenarioData }) {
         <div className="game-complete-emoji">🔍</div>
         <h2 className="game-complete-title">Great Job Detective!</h2>
         <p className="game-complete-score">
-          You spotted all the vocabulary mistakes! Boris is so proud! 🐶⭐
+          You spotted all {questions.length} vocabulary mistakes! Boris is so proud! 🐶⭐
         </p>
         <div className="game-stars">⭐⭐⭐</div>
         <button className="game-replay-btn" onClick={restart}>
