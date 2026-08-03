@@ -1033,10 +1033,54 @@ img {
 }
 
 /* Matching Pairs */
+.memory-game-container {
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  width: 100%;
+}
+
+.memory-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-card);
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.memory-header strong {
+  color: var(--text-primary);
+}
+
+.memory-reset-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text-primary);
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.memory-reset-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.05);
+}
+
 .pairs-board {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0.8rem;
+  gap: 0.6rem;
+  width: 100%;
 }
 
 .pairs-card {
@@ -1067,11 +1111,12 @@ img {
   align-items: center;
   justify-content: center;
   border: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
 }
 
 .pairs-front {
   background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-card));
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--text-muted);
 }
@@ -1080,22 +1125,31 @@ img {
   transform: rotateY(180deg);
   background: var(--bg-card);
   flex-direction: column;
-  padding: 0.5rem;
+  padding: 0.4rem;
+  transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
 }
 
 .pairs-card.matched .pairs-card-inner {
   transform: rotateY(180deg);
-  opacity: 0.6;
+}
+
+.pairs-card.matched .pairs-back {
+  background: linear-gradient(135deg, rgba(74, 222, 128, 0.18), var(--bg-card));
+  border-color: rgba(74, 222, 128, 0.8);
+  box-shadow: 0 0 12px rgba(74, 222, 128, 0.25);
+  opacity: 0.9;
 }
 
 .pairs-emoji {
-  font-size: 2.5rem;
+  font-size: 2.2rem;
 }
 
 .pairs-word {
-  font-size: 1rem;
+  font-size: 0.88rem;
   font-weight: 600;
   text-align: center;
+  line-height: 1.2;
+  word-break: break-word;
 }
 
 /* Boris Reaction Overlay */
@@ -1196,13 +1250,15 @@ img {
   .scenario-tabs { gap: 0.3rem; }
   .scenario-tab { font-size: 0.7rem; padding: 0.5rem 0.6rem; }
   .vocab-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
-  .pairs-board { grid-template-columns: repeat(3, 1fr); }
+  .pairs-board { grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
   .game-options { grid-template-columns: 1fr; }
   .lang-badge { display: none; }
 }
 
 @media (max-width: 480px) {
-  .pairs-board { grid-template-columns: repeat(3, 1fr); }
+  .pairs-board { grid-template-columns: repeat(4, 1fr); gap: 0.4rem; }
+  .pairs-emoji { font-size: 1.6rem; }
+  .pairs-word { font-size: 0.75rem; }
   .scenario-hero { height: 200px; }
   .scenario-hero-title { font-size: 1.4rem; }
 }

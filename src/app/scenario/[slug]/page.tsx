@@ -378,16 +378,19 @@ function MemoryTab({ scenario }: { scenario: ScenarioData }) {
       const card2 = cards.find((c) => c.id === second);
 
       if (card1 && card2 && card1.word === card2.word) {
-        const newMatched = [...matchedWords, card1.word];
-        setMatchedWords(newMatched);
-        setFlippedIds([]);
-        setLock(false);
-        if (
-          newMatched.length >=
-          Math.min(8, scenario.vocabulary.length)
-        ) {
-          setTimeout(() => setComplete(true), 800);
-        }
+        setTimeout(() => {
+          setMatchedWords((prev) => {
+            const next = [...prev, card1.word];
+            if (
+              next.length >= Math.min(8, scenario.vocabulary.length)
+            ) {
+              setTimeout(() => setComplete(true), 600);
+            }
+            return next;
+          });
+          setFlippedIds([]);
+          setLock(false);
+        }, 600);
       } else {
         setTimeout(() => {
           setFlippedIds([]);
@@ -413,31 +416,46 @@ function MemoryTab({ scenario }: { scenario: ScenarioData }) {
     );
   }
 
+  const totalPairs = Math.min(8, scenario.vocabulary.length);
+
   return (
-    <div className="pairs-board">
-      {cards.map((card, index) => {
-        const isFlipped =
-          flippedIds.includes(card.id) || matchedWords.includes(card.word);
-        const isMatched = matchedWords.includes(card.word);
-        return (
-          <div
-            key={card.id}
-            className={`pairs-card ${isFlipped ? "flipped" : ""} ${isMatched ? "matched" : ""}`}
-            onClick={() => handleCardClick(card.id, card.word)}
-          >
-            <div className="pairs-card-inner">
-              <div className="pairs-front">{index + 1}</div>
-              <div className="pairs-back" style={{ flexDirection: "column", justifyContent: "center" }}>
-                {card.type === "emoji" ? (
-                  <div className="pairs-emoji">{card.display}</div>
-                ) : (
-                  <div className="pairs-word">{card.display}</div>
-                )}
+    <div className="memory-game-container">
+      <div className="memory-header">
+        <div className="memory-progress">
+          <span>🃏 Pairs Found: <strong>{matchedWords.length} / {totalPairs}</strong></span>
+        </div>
+        <button className="memory-reset-btn" onClick={initGame} title="Restart Game">
+          🔄 Reset
+        </button>
+      </div>
+      <div className="pairs-board">
+        {cards.map((card, index) => {
+          const isFlipped =
+            flippedIds.includes(card.id) || matchedWords.includes(card.word);
+          const isMatched = matchedWords.includes(card.word);
+          return (
+            <div
+              key={card.id}
+              className={`pairs-card ${isFlipped ? "flipped" : ""} ${isMatched ? "matched" : ""}`}
+              onClick={() => handleCardClick(card.id, card.word)}
+            >
+              <div className="pairs-card-inner">
+                <div className="pairs-front">{index + 1}</div>
+                <div
+                  className="pairs-back"
+                  style={{ flexDirection: "column", justifyContent: "center" }}
+                >
+                  {card.type === "emoji" ? (
+                    <div className="pairs-emoji">{card.display}</div>
+                  ) : (
+                    <div className="pairs-word">{card.display}</div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
