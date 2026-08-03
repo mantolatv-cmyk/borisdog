@@ -1213,53 +1213,108 @@ function SpellingScrambleTab({ scenario }: { scenario: ScenarioData }) {
 // Tab: True or False
 // ================================================
 function TrueOrFalseTab({ scenario }: { scenario: ScenarioData }) {
-  const [questions] = useState(() => {
-    const qs: {
-      emoji: string;
-      statement: string;
-      statementPt: string;
-      correct: boolean;
-    }[] = [];
-    const vocab = [...scenario.vocabulary].sort(() => Math.random() - 0.5);
-    vocab.slice(0, 7).forEach((v, i) => {
-      if (i % 2 === 0) {
-        qs.push({
-          emoji: v.emoji,
-          statement: `This is "${v.word}" ${v.emoji}`,
-          statementPt: `Isso é "${v.pt}" ${v.emoji}`,
-          correct: true,
-        });
-      } else {
-        const wrong =
-          vocab[(i + 3) % vocab.length];
-        qs.push({
-          emoji: v.emoji,
-          statement: `This ${v.emoji} is "${wrong.word}"`,
-          statementPt: `Isso ${v.emoji} é "${wrong.pt}"`,
-          correct: false,
-        });
-      }
-    });
-    return qs;
-  });
+  const [questions, setQuestions] = useState<
+    { statement: string; statementPt: string; correct: boolean; explanation?: string }[]
+  >([]);
   const [qIndex, setQIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [answered, setAnswered] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [complete, setComplete] = useState(false);
 
+  const initGame = useCallback(() => {
+    const qs: { statement: string; statementPt: string; correct: boolean; explanation?: string }[] = [];
+    const vocab = [...scenario.vocabulary].sort(() => Math.random() - 0.5);
+
+    // 1. Generate A2 Vocabulary & Sentence Structure Questions
+    vocab.forEach((v, i) => {
+      if (i % 2 === 0) {
+        // TRUE A2 Level Sentence
+        const isSpelling = i % 4 === 0;
+        if (isSpelling) {
+          qs.push({
+            statement: `The English word "${v.word}" begins with the letter '${v.word[0].toUpperCase()}'.`,
+            statementPt: `A palavra em inglês "${v.word}" começa com a letra '${v.word[0].toUpperCase()}'.`,
+            correct: true,
+            explanation: `Correct! "${v.word}" begins with '${v.word[0].toUpperCase()}'.`,
+          });
+        } else {
+          qs.push({
+            statement: `In English, the word "${v.word}" corresponds to "${v.pt}" in Portuguese.`,
+            statementPt: `Em inglês, a palavra "${v.word}" corresponde a "${v.pt}" em português.`,
+            correct: true,
+            explanation: `Correct! "${v.word}" means "${v.pt}".`,
+          });
+        }
+      } else {
+        // FALSE A2 Level Sentence
+        const wrongV = vocab[(i + 2) % vocab.length];
+        const isWrongLetter = i % 3 === 0;
+        if (isWrongLetter && v.word.length > 2) {
+          const wrongLetter = String.fromCharCode(((v.word.charCodeAt(0) - 65 + 5) % 26) + 65);
+          qs.push({
+            statement: `The English word "${v.word}" begins with the letter '${wrongLetter}'.`,
+            statementPt: `A palavra em inglês "${v.word}" começa com a letra '${wrongLetter}'.`,
+            correct: false,
+            explanation: `False! "${v.word}" begins with '${v.word[0].toUpperCase()}', not '${wrongLetter}'.`,
+          });
+        } else {
+          qs.push({
+            statement: `In English, the word "${v.word}" corresponds to "${wrongV.pt}" in Portuguese.`,
+            statementPt: `Em inglês, a palavra "${v.word}" corresponde a "${wrongV.pt}" em português.`,
+            correct: false,
+            explanation: `False! "${v.word}" means "${v.pt}", while "${wrongV.word}" means "${wrongV.pt}".`,
+          });
+        }
+      }
+    });
+
+    // 2. Add scenario-specific A2 context questions if available
+    if (scenario.findMistakeQuestions && scenario.findMistakeQuestions.length > 0) {
+      scenario.findMistakeQuestions.forEach((fm, idx) => {
+        if (idx % 2 === 0) {
+          qs.push({
+            statement: fm.wrongEn,
+            statementPt: fm.pt,
+            correct: false,
+            explanation: fm.correctEn,
+          });
+        } else {
+          qs.push({
+            statement: fm.correctEn.replace(/^No!\s*/i, ""),
+            statementPt: fm.pt,
+            correct: true,
+            explanation: "That is correct!",
+          });
+        }
+      });
+    }
+
+    // Shuffle and select 8 A2 questions
+    const shuffled = qs.sort(() => Math.random() - 0.5).slice(0, 8);
+    setQuestions(shuffled);
+    setQIndex(0);
+    setScore(0);
+    setAnswered(false);
+    setFeedback("");
+    setComplete(false);
+  }, [scenario]);
+
+  useEffect(() => {
+    initGame();
+  }, [initGame]);
+
   const handleAnswer = (answer: boolean) => {
-    if (answered) return;
+    if (answered || questions.length === 0) return;
     setAnswered(true);
-    const correct = questions[qIndex].correct === answer;
-    if (correct) {
+    const currentQ = questions[qIndex];
+    const isCorrect = currentQ.correct === answer;
+    if (isCorrect) {
       setScore((s) => s + 1);
-      setFeedback("🎉 Correct! Boris wags his tail! 🐶");
+      setFeedback(`🎉 Correct! ${currentQ.explanation || ""}`);
     } else {
       setFeedback(
-        questions[qIndex].correct
-          ? "❌ It was TRUE! Keep learning! 🐶"
-          : "❌ It was FALSE! Keep trying! 🐶"
+        `❌ Incorrect! ${currentQ.explanation || (currentQ.correct ? "This statement is TRUE." : "This statement is FALSE.")}`
       );
     }
     setTimeout(() => {
@@ -1270,31 +1325,24 @@ function TrueOrFalseTab({ scenario }: { scenario: ScenarioData }) {
       } else {
         setComplete(true);
       }
-    }, 1500);
+    }, 2000);
   };
+
+  if (questions.length === 0) return null;
 
   if (complete) {
     const pct = Math.round((score / questions.length) * 100);
     return (
       <div className="game-complete active">
-        <div className="game-complete-emoji">🤔</div>
-        <h2 className="game-complete-title">Truth Detective!</h2>
+        <div className="game-complete-emoji">🎯</div>
+        <h2 className="game-complete-title">A2 Level Challenge Complete!</h2>
         <p className="game-complete-score">
-          You got {score} out of {questions.length} correct! ({pct}%)
+          You scored {score} out of {questions.length} ({pct}%)
         </p>
         <div className="game-stars">
           {pct >= 90 ? "⭐⭐⭐" : pct >= 60 ? "⭐⭐" : "⭐"}
         </div>
-        <button
-          className="game-replay-btn"
-          onClick={() => {
-            setQIndex(0);
-            setScore(0);
-            setComplete(false);
-            setAnswered(false);
-            setFeedback("");
-          }}
-        >
+        <button className="game-replay-btn" onClick={initGame}>
           🔄 Play Again!
         </button>
       </div>
@@ -1304,66 +1352,46 @@ function TrueOrFalseTab({ scenario }: { scenario: ScenarioData }) {
   const q = questions[qIndex];
 
   return (
-    <div className="game-area" style={{ textAlign: "center" }}>
-      <div className="game-score">
-        ⭐ Score: <strong>{score}</strong> / <span>{questions.length}</span>
+    <div className="game-area tf-game-area" style={{ textAlign: "center", maxWidth: "600px", margin: "0 auto" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.8rem" }}>
+        <span className="level-badge-a2">Level A2 Grammar & Comprehension</span>
+        <div className="game-score">
+          Score: <strong>{score}</strong> / <span>{questions.length}</span>
+        </div>
       </div>
-      <div className="game-progress">
+
+      <div className="game-progress" style={{ marginBottom: "1.5rem" }}>
         <div
           className="game-progress-bar"
-          style={{ width: `${(qIndex / questions.length) * 100}%` }}
+          style={{ width: `${((qIndex + 1) / questions.length) * 100}%` }}
         />
       </div>
-      <div style={{ fontSize: "4rem", margin: "1rem 0" }}>{q.emoji}</div>
-      <div
-        style={{
-          fontSize: "1.3rem",
-          fontWeight: 600,
-          margin: "1rem 0",
-          padding: "1rem",
-          background: "var(--bg-card)",
-          borderRadius: "var(--radius-lg)",
-          border: "1px solid rgba(255,255,255,0.08)",
-        }}
-      >
-        {q.statement}
+
+      <div className="tf-statement-card">
+        <div className="tf-statement-tag">Statement {qIndex + 1} of {questions.length}</div>
+        <p className="tf-statement-text">&ldquo;{q.statement}&rdquo;</p>
+        <p className="tf-statement-pt">🇧🇷 {q.statementPt}</p>
       </div>
-      <div
-        style={{
-          fontSize: "0.9rem",
-          color: "var(--text-secondary)",
-          marginBottom: "1.5rem",
-        }}
-      >
-        🇧🇷 {q.statementPt}
-      </div>
-      <div
-        className="game-options"
-        style={{ maxWidth: "400px", margin: "0 auto" }}
-      >
+
+      <div className="game-options" style={{ maxWidth: "440px", margin: "1.5rem auto 0", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
         <button
-          className={`game-option ${answered ? (q.correct ? "correct" : "wrong") + " disabled" : ""}`}
+          className={`game-option tf-btn tf-btn-true ${answered ? (q.correct ? "correct" : "wrong") + " disabled" : ""}`}
           onClick={() => handleAnswer(true)}
-          style={{
-            background: answered && q.correct ? "rgba(102,187,106,0.2)" : undefined,
-          }}
+          disabled={answered}
         >
-          ✅ TRUE
+          TRUE
         </button>
         <button
-          className={`game-option ${answered ? (!q.correct ? "correct" : "wrong") + " disabled" : ""}`}
+          className={`game-option tf-btn tf-btn-false ${answered ? (!q.correct ? "correct" : "wrong") + " disabled" : ""}`}
           onClick={() => handleAnswer(false)}
-          style={{
-            background: answered && !q.correct ? "rgba(102,187,106,0.2)" : undefined,
-          }}
+          disabled={answered}
         >
-          ❌ FALSE
+          FALSE
         </button>
       </div>
+
       {feedback && (
-        <div
-          className={`game-feedback ${feedback.includes("Correct") ? "correct-msg" : "wrong-msg"}`}
-        >
+        <div className={`game-feedback ${feedback.includes("Correct") ? "correct-msg" : "wrong-msg"}`} style={{ marginTop: "1rem" }}>
           {feedback}
         </div>
       )}

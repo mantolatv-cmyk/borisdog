@@ -1152,6 +1152,91 @@ img {
   word-break: break-word;
 }
 
+/* True or False Level A2 Styles */
+.tf-game-area {
+  padding: 0.5rem 0;
+}
+
+.level-badge-a2 {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.35rem 0.8rem;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.tf-statement-card {
+  background: linear-gradient(135deg, var(--bg-card), var(--bg-tertiary));
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-lg);
+  padding: 2rem 1.5rem;
+  margin: 1.2rem 0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  position: relative;
+  text-align: center;
+}
+
+.tf-statement-tag {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.8rem;
+}
+
+.tf-statement-text {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.5;
+  margin-bottom: 0.8rem;
+}
+
+.tf-statement-pt {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.tf-btn {
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 0.9rem 1.5rem;
+  border-radius: var(--radius-md);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  color: #ffffff;
+}
+
+.tf-btn-true {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.25), rgba(34, 197, 94, 0.1));
+  border-color: rgba(34, 197, 94, 0.5);
+}
+
+.tf-btn-true:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.45), rgba(34, 197, 94, 0.2));
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3);
+}
+
+.tf-btn-false {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(239, 68, 68, 0.1));
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.tf-btn-false:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.45), rgba(239, 68, 68, 0.2));
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
+}
+
 /* Boris Reaction Overlay */
 .boris-reaction {
   position: fixed;
