@@ -1034,7 +1034,7 @@ img {
 
 /* Matching Pairs */
 .memory-game-container {
-  max-width: 480px;
+  max-width: 620px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -1078,7 +1078,7 @@ img {
 
 .pairs-board {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 0.6rem;
   width: 100%;
 }
@@ -1250,15 +1250,15 @@ img {
   .scenario-tabs { gap: 0.3rem; }
   .scenario-tab { font-size: 0.7rem; padding: 0.5rem 0.6rem; }
   .vocab-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
-  .pairs-board { grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
+  .pairs-board { grid-template-columns: repeat(5, 1fr); gap: 0.45rem; }
   .game-options { grid-template-columns: 1fr; }
   .lang-badge { display: none; }
 }
 
 @media (max-width: 480px) {
-  .pairs-board { grid-template-columns: repeat(4, 1fr); gap: 0.4rem; }
-  .pairs-emoji { font-size: 1.6rem; }
-  .pairs-word { font-size: 0.75rem; }
+  .pairs-board { grid-template-columns: repeat(5, 1fr); gap: 0.35rem; }
+  .pairs-emoji { font-size: 1.4rem; }
+  .pairs-word { font-size: 0.7rem; }
   .scenario-hero { height: 200px; }
   .scenario-hero-title { font-size: 1.4rem; }
 }

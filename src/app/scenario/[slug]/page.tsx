@@ -334,7 +334,7 @@ function MemoryTab({ scenario }: { scenario: ScenarioData }) {
   const [complete, setComplete] = useState(false);
 
   const initGame = useCallback(() => {
-    const numPairs = Math.min(8, scenario.vocabulary.length);
+    const numPairs = Math.min(10, scenario.vocabulary.length);
     const items = [...scenario.vocabulary]
       .sort(() => Math.random() - 0.5)
       .slice(0, numPairs);
@@ -382,7 +382,7 @@ function MemoryTab({ scenario }: { scenario: ScenarioData }) {
           setMatchedWords((prev) => {
             const next = [...prev, card1.word];
             if (
-              next.length >= Math.min(8, scenario.vocabulary.length)
+              next.length >= Math.min(10, scenario.vocabulary.length)
             ) {
               setTimeout(() => setComplete(true), 600);
             }
@@ -416,7 +416,7 @@ function MemoryTab({ scenario }: { scenario: ScenarioData }) {
     );
   }
 
-  const totalPairs = Math.min(8, scenario.vocabulary.length);
+  const totalPairs = Math.min(10, scenario.vocabulary.length);
 
   return (
     <div className="memory-game-container">
