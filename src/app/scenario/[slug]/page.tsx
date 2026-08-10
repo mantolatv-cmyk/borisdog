@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getScenarioBySlug, type VocabItem, type ScenarioData } from "@/data/scenarios";
 import { notFound } from "next/navigation";
+import * as LucideIcons from "lucide-react";
 
 // ================================================
 // Boris Reaction Component
@@ -100,56 +101,117 @@ function StoryTab({ scenario }: { scenario: ScenarioData }) {
 // ================================================
 // Tab: Vocabulary (Word Garden)
 // ================================================
+function getLucideIcon(word: string) {
+  const formatted = word.replace(/[^a-zA-Z]/g, "").toLowerCase();
+  const iconKey = Object.keys(LucideIcons).find(
+    (key) => key.toLowerCase() === formatted
+  );
+  if (iconKey) {
+    const Icon = (LucideIcons as any)[iconKey];
+    return <Icon size={80} strokeWidth={1.5} />;
+  }
+  // Fallback to Image icon if exact word doesn't match a Lucide icon
+  return <LucideIcons.Image size={80} strokeWidth={1.5} />;
+}
+
 function VocabTab({ scenario }: { scenario: ScenarioData }) {
-  const [flipped, setFlipped] = useState<Record<number, boolean>>({});
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [flipped, setFlipped] = useState(false);
+  const [complete, setComplete] = useState(false);
+
+  const total = scenario.vocabulary.length;
+
+  const nextWord = () => {
+    setFlipped(false);
+    setTimeout(() => {
+      if (currentIndex + 1 < total) {
+        setCurrentIndex((prev) => prev + 1);
+      } else {
+        setComplete(true);
+      }
+    }, 200);
+  };
+
+  const restart = () => {
+    setComplete(false);
+    setCurrentIndex(0);
+    setFlipped(false);
+  };
+
+  if (complete) {
+    return (
+      <div className="game-complete active">
+        <div className="game-complete-emoji">🌱</div>
+        <h2 className="game-complete-title">Garden Complete!</h2>
+        <p className="game-complete-score">
+          You reviewed all {total} words! Boris is proud! 🐶⭐
+        </p>
+        <div className="game-stars">⭐⭐⭐</div>
+        <button className="game-replay-btn" onClick={restart}>
+          🔄 Review Again
+        </button>
+      </div>
+    );
+  }
+
+  const v = scenario.vocabulary[currentIndex];
+  // Determine text to show on back
+  const displayWordEn = v.wordEn || v.word;
 
   return (
-    <div className="vocab-grid">
-      {scenario.vocabulary.map((v, i) => {
-        const displayWord = v.letter
-          ? `${v.letter} — ${v.word}`
-          : v.num
-            ? `${v.num} — ${v.word}`
-            : v.word;
-
-        return (
+    <div className="flashcard-container">
+      <div className="game-score" style={{ marginBottom: '1.5rem', justifyContent: 'center' }}>
+        ⭐ Word: <strong>{currentIndex + 1}</strong> / <span>{total}</span>
+      </div>
+      
+      <div
+        className={`vocab-card large-flashcard ${flipped ? "flipped" : ""}`}
+        onClick={() => setFlipped(!flipped)}
+      >
+        <div className="vocab-card-inner">
           <div
-            key={i}
-            className={`vocab-card ${flipped[i] ? "flipped" : ""}`}
-            onClick={() =>
-              setFlipped((prev) => ({ ...prev, [i]: !prev[i] }))
-            }
+            className="vocab-card-front"
+            style={v.hex ? { borderBottom: `6px solid ${v.hex}` } : undefined}
           >
-            <div className="vocab-card-inner">
-              <div
-                className="vocab-card-front"
-                style={v.hex ? { borderBottom: `4px solid ${v.hex}` } : undefined}
-              >
-                <div className="vocab-emoji">{v.emoji}</div>
-                <div className="vocab-word">{displayWord}</div>
-                <div className="vocab-hint">
-                  {v.sound || "tap to flip"}
-                </div>
-              </div>
-              <div
-                className="vocab-card-back"
-                style={
-                  v.hex
-                    ? {
-                        background: `linear-gradient(135deg, ${v.hex}22, ${v.hex}11)`,
-                        border: `2px solid ${v.hex}44`,
-                      }
-                    : undefined
-                }
-              >
-                <div className="vocab-emoji">{v.emoji}</div>
-                <div className="vocab-translation">{v.pt}</div>
-                <div className="vocab-back-word">{v.word}</div>
-              </div>
+            <div className="vocab-emoji" style={{ color: "var(--accent-primary)", display: "flex", justifyContent: "center", marginBottom: "1rem" }}>
+              {getLucideIcon(v.word)}
+            </div>
+            <div className="vocab-word" style={{ fontSize: '2.5rem' }}>{v.pt}</div>
+            <div className="vocab-hint">
+              tap to flip for English
             </div>
           </div>
-        );
-      })}
+          <div
+            className="vocab-card-back"
+            style={
+              v.hex
+                ? {
+                    background: `linear-gradient(135deg, ${v.hex}22, ${v.hex}11)`,
+                    border: `4px solid ${v.hex}44`,
+                  }
+                : undefined
+            }
+          >
+            <div className="vocab-emoji" style={{ color: "var(--accent-primary)", display: "flex", justifyContent: "center", marginBottom: "1rem" }}>
+              {getLucideIcon(v.word)}
+            </div>
+            <div className="vocab-word" style={{ fontSize: '3rem', color: 'var(--accent-primary)' }}>{displayWordEn}</div>
+            <div className="vocab-hint">
+              {v.sound || "English"}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="flashcard-controls" style={{ display: 'flex', justifyContent: 'center' }}>
+        <button 
+          className="game-replay-btn" 
+          onClick={nextWord}
+          style={{ marginTop: '2.5rem', minWidth: '220px', padding: '1rem 2rem', fontSize: '1.2rem' }}
+        >
+          {currentIndex + 1 === total ? "Finish 🎉" : "Next Word ➡️"}
+        </button>
+      </div>
     </div>
   );
 }
@@ -917,6 +979,7 @@ function SentenceBuilderTab({ scenario }: { scenario: ScenarioData }) {
   const [available, setAvailable] = useState<string[]>([]);
   const [complete, setComplete] = useState(false);
   const [score, setScore] = useState(0);
+  const [feedback, setFeedback] = useState<"idle" | "correct" | "wrong">("idle");
 
   useEffect(() => {
     if (sentences.length > 0) {
@@ -924,10 +987,13 @@ function SentenceBuilderTab({ scenario }: { scenario: ScenarioData }) {
         sentences[0].en.split(" ").sort(() => Math.random() - 0.5)
       );
       setPlaced([]);
+      setFeedback("idle");
     }
   }, [sentences]);
 
   const handleWordClick = (word: string, idx: number) => {
+    if (feedback !== "idle") return;
+
     const newPlaced = [...placed, word];
     setPlaced(newPlaced);
     const newAvailable = [...available];
@@ -939,8 +1005,13 @@ function SentenceBuilderTab({ scenario }: { scenario: ScenarioData }) {
       const builtSentence = newPlaced.join(" ");
       if (builtSentence === correctSentence) {
         setScore((s) => s + 1);
+        setFeedback("correct");
+      } else {
+        setFeedback("wrong");
       }
+      
       setTimeout(() => {
+        setFeedback("idle");
         if (sIndex + 1 < sentences.length) {
           setSIndex((s) => s + 1);
           setPlaced([]);
@@ -952,11 +1023,12 @@ function SentenceBuilderTab({ scenario }: { scenario: ScenarioData }) {
         } else {
           setComplete(true);
         }
-      }, 1200);
+      }, 2500); // 2.5s delay to read the feedback
     }
   };
 
   const removePlaced = (idx: number) => {
+    if (feedback !== "idle") return;
     const word = placed[idx];
     const newPlaced = [...placed];
     newPlaced.splice(idx, 1);
@@ -986,6 +1058,7 @@ function SentenceBuilderTab({ scenario }: { scenario: ScenarioData }) {
             setScore(0);
             setComplete(false);
             setPlaced([]);
+            setFeedback("idle");
             setAvailable(
               sentences[0].en
                 .split(" ")
@@ -1026,7 +1099,11 @@ function SentenceBuilderTab({ scenario }: { scenario: ScenarioData }) {
             gap: "0.5rem",
             justifyContent: "center",
             margin: "1rem 0",
-            border: "2px dashed rgba(255,255,255,0.15)",
+            border: feedback === "correct" 
+              ? "2px solid var(--accent-green)" 
+              : feedback === "wrong" 
+              ? "2px solid var(--accent-red)" 
+              : "2px dashed rgba(255,255,255,0.15)",
           }}
         >
           {placed.length === 0 && (
@@ -1040,21 +1117,37 @@ function SentenceBuilderTab({ scenario }: { scenario: ScenarioData }) {
               onClick={() => removePlaced(i)}
               style={{
                 padding: "0.4rem 0.8rem",
-                background: "var(--accent-primary)",
-                color: "var(--bg-primary)",
+                background: feedback === "correct" 
+                  ? "var(--accent-green)" 
+                  : feedback === "wrong" 
+                  ? "var(--accent-red)" 
+                  : "var(--accent-primary)",
+                color: feedback !== "idle" ? "#fff" : "var(--bg-primary)",
                 borderRadius: "var(--radius-sm)",
                 fontWeight: 600,
                 fontSize: "0.9rem",
                 border: "none",
-                cursor: "pointer",
+                cursor: feedback === "idle" ? "pointer" : "default",
               }}
             >
               {w}
             </button>
           ))}
         </div>
+        
+        {feedback === "correct" && (
+          <div style={{ color: "var(--accent-green)", fontWeight: "bold", marginBottom: "1rem" }}>
+            ✅ Correct! Great job!
+          </div>
+        )}
+        {feedback === "wrong" && (
+          <div style={{ color: "var(--accent-red)", fontWeight: "bold", marginBottom: "1rem", background: "rgba(239, 83, 80, 0.1)", padding: "0.5rem", borderRadius: "8px" }}>
+            ❌ Oops! The correct sentence is:<br/>
+            <span style={{ color: "var(--text-primary)" }}>{sentences[sIndex].en}</span>
+          </div>
+        )}
       </div>
-      <div className="game-options" style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", justifyContent: "center" }}>
+      <div className="game-options" style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", justifyContent: "center", opacity: feedback !== "idle" ? 0.5 : 1, pointerEvents: feedback !== "idle" ? "none" : "auto" }}>
         {available.map((w, i) => (
           <button
             key={`${w}-${i}`}
