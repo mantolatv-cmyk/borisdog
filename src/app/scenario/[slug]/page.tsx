@@ -156,7 +156,7 @@ function VocabTab({ scenario }: { scenario: ScenarioData }) {
 
   const v = scenario.vocabulary[currentIndex];
   // Determine text to show on back
-  const displayWordEn = v.wordEn || v.word;
+  const displayWordEn = v.word;
 
   return (
     <div className="flashcard-container">
