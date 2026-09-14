@@ -714,6 +714,31 @@ function TellMeTab({ scenario }: { scenario: ScenarioData }) {
         { emoji: "👁️", en: "What is your favorite feature about yourself?", pt: "Qual é a sua característica favorita em você mesmo?" },
         { emoji: "🦵", en: "What is your favorite sport or physical activity?", pt: "Qual é o seu esporte ou atividade física favorita?" },
         { emoji: "💪", en: "What do you do to keep your body healthy and strong?", pt: "O que você faz para manter seu corpo saudável e forte?" }
+      ],
+      travel: [
+        { emoji: "✈️", en: "Have you ever traveled on an airplane?", pt: "Você já viajou de avião?" },
+        { emoji: "🌍", en: "If you could travel anywhere in the world, where would you go?", pt: "Se você pudesse viajar para qualquer lugar do mundo, para onde iria?" },
+        { emoji: "🚗", en: "What is your favorite way to travel: by car, plane, or bus?", pt: "Qual é o seu jeito favorito de viajar: de carro, avião ou ônibus?" }
+      ],
+      hobbies: [
+        { emoji: "🎸", en: "What is your favorite hobby to do on the weekend?", pt: "Qual é o seu passatempo favorito para fazer no fim de semana?" },
+        { emoji: "🎨", en: "Do you prefer painting, singing, or playing an instrument?", pt: "Você prefere pintar, cantar ou tocar um instrumento?" },
+        { emoji: "📖", en: "What is the best book you have read recently?", pt: "Qual é o melhor livro que você leu recentemente?" }
+      ],
+      shopping: [
+        { emoji: "🛍️", en: "Do you like going to the mall with your family?", pt: "Você gosta de ir ao shopping com a sua família?" },
+        { emoji: "👟", en: "What is your favorite piece of clothing to wear?", pt: "Qual é a sua peça de roupa favorita de vestir?" },
+        { emoji: "👕", en: "Do you prefer buying new toys or new clothes?", pt: "Você prefere comprar brinquedos novos ou roupas novas?" }
+      ],
+      technology: [
+        { emoji: "📱", en: "Do you prefer playing games on a phone or on a computer?", pt: "Você prefere jogar no celular ou no computador?" },
+        { emoji: "📺", en: "What is your favorite video to watch on the internet?", pt: "Qual é o seu vídeo favorito de assistir na internet?" },
+        { emoji: "🎮", en: "If you could invent a new gadget, what would it do?", pt: "Se você pudesse inventar um aparelho novo, o que ele faria?" }
+      ],
+      city: [
+        { emoji: "🏙️", en: "What is your favorite place to visit in your city?", pt: "Qual é o seu lugar favorito para visitar na sua cidade?" },
+        { emoji: "🥖", en: "Have you ever gone to the bakery to buy bread?", pt: "Você já foi à padaria para comprar pão?" },
+        { emoji: "🏛️", en: "Would you rather visit a museum or a big supermarket?", pt: "Você preferiria visitar um museu ou um grande supermercado?" }
       ]
     };
 
