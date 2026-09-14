@@ -634,32 +634,94 @@ function FeedBorisTab({ scenario }: { scenario: ScenarioData }) {
 // ================================================
 function TellMeTab({ scenario }: { scenario: ScenarioData }) {
   const [questions] = useState(() => {
-    const prompts = [
-      (v: VocabItem) => ({
-        emoji: v.emoji,
-        en: `Tell me: What do you like most about ${v.word} (${v.pt})?`,
-        pt: `Me conte: O que você mais gosta sobre ${v.word} (${v.pt})?`,
-      }),
-      (v: VocabItem) => ({
-        emoji: v.emoji,
-        en: `Tell me: How often do you see or use ${v.word} in your daily life?`,
-        pt: `Me conte: Com que frequência você vê ou usa ${v.word} no seu dia a dia?`,
-      }),
-      (v: VocabItem) => ({
-        emoji: v.emoji,
-        en: `Tell me: Can you describe ${v.word} using three different words in English?`,
-        pt: `Me conte: Você consegue descrever ${v.word} usando três palavras em inglês?`,
-      }),
-      (v: VocabItem) => ({
-        emoji: v.emoji,
-        en: `Tell me: If you had to explain ${v.word} to a friend, what would you say?`,
-        pt: `Me conte: Se você tivesse que explicar ${v.word} para um amigo, o que diria?`,
-      }),
+    const scenarioQuestions: Record<string, { emoji: string; en: string; pt: string }[]> = {
+      alphabet: [
+        { emoji: "🔤", en: "What is your favorite letter of the alphabet and why?", pt: "Qual é a sua letra favorita do alfabeto e por quê?" },
+        { emoji: "📖", en: "Can you spell your own name in English?", pt: "Você consegue soletrar seu próprio nome em inglês?" },
+        { emoji: "🚀", en: "If you could travel to space like an astronaut, where would you go?", pt: "Se você pudesse viajar para o espaço como um astronauta, para onde iria?" }
+      ],
+      colors: [
+        { emoji: "🎨", en: "What is your favorite color to wear?", pt: "Qual é a sua cor favorita para vestir?" },
+        { emoji: "🌈", en: "If you could paint your bedroom any color, which one would you choose?", pt: "Se você pudesse pintar seu quarto de qualquer cor, qual escolheria?" },
+        { emoji: "☀️", en: "What colorful things do you see outside your window right now?", pt: "Que coisas coloridas você vê pela sua janela agora?" }
+      ],
+      numbers: [
+        { emoji: "🎂", en: "How old are you, and what is your lucky number?", pt: "Quantos anos você tem e qual é o seu número da sorte?" },
+        { emoji: "🍕", en: "If you had 10 pizzas, who would you share them with?", pt: "Se você tivesse 10 pizzas, com quem você as dividiria?" },
+        { emoji: "🕒", en: "What time do you usually go to sleep?", pt: "A que horas você costuma ir dormir?" }
+      ],
+      animals: [
+        { emoji: "🐶", en: "Do you have any pets? If not, what pet would you like to have?", pt: "Você tem algum animal de estimação? Se não, qual gostaria de ter?" },
+        { emoji: "🦁", en: "What is your favorite wild animal and why?", pt: "Qual é o seu animal selvagem favorito e por quê?" },
+        { emoji: "🦉", en: "If you could talk to any animal, which one would it be?", pt: "Se você pudesse conversar com qualquer animal, qual seria?" }
+      ],
+      foods: [
+        { emoji: "🍎", en: "What is your favorite fruit to eat in the morning?", pt: "Qual é a sua fruta favorita para comer de manhã?" },
+        { emoji: "🥦", en: "Is there any vegetable that you really don't like?", pt: "Tem algum vegetal que você realmente não gosta?" },
+        { emoji: "🥤", en: "What is your favorite drink on a hot day?", pt: "Qual é a sua bebida favorita em um dia quente?" }
+      ],
+      foods2: [
+        { emoji: "🍕", en: "What is your favorite food to eat on the weekend?", pt: "Qual é a sua comida favorita para comer no fim de semana?" },
+        { emoji: "🥞", en: "Do you prefer sweet foods like pancakes, or salty foods like bacon?", pt: "Você prefere comidas doces como panquecas ou salgadas como bacon?" },
+        { emoji: "👩‍🍳", en: "Have you ever helped your parents cook dinner?", pt: "Você já ajudou seus pais a cozinhar o jantar?" }
+      ],
+      toys: [
+        { emoji: "🧸", en: "What was your favorite toy when you were younger?", pt: "Qual era o seu brinquedo favorito quando você era mais novo?" },
+        { emoji: "🎮", en: "Do you prefer playing video games or playing outside?", pt: "Você prefere jogar videogame ou brincar lá fora?" },
+        { emoji: "🧩", en: "What is the best game to play with your friends?", pt: "Qual é o melhor jogo para jogar com seus amigos?" }
+      ],
+      routines: [
+        { emoji: "⏰", en: "What is the very first thing you do when you wake up?", pt: "Qual é a primeira coisa que você faz quando acorda?" },
+        { emoji: "🎒", en: "What is your favorite part of your daily routine?", pt: "Qual é a sua parte favorita da sua rotina diária?" },
+        { emoji: "🌙", en: "What do you like to do to relax before going to bed?", pt: "O que você gosta de fazer para relaxar antes de ir para a cama?" }
+      ],
+      weather: [
+        { emoji: "☀️", en: "What is your favorite type of weather and why?", pt: "Qual é o seu tipo de clima favorito e por quê?" },
+        { emoji: "🌧️", en: "What do you like to do inside when it is raining?", pt: "O que você gosta de fazer dentro de casa quando está chovendo?" },
+        { emoji: "❄️", en: "Have you ever seen snow? What would you build with it?", pt: "Você já viu neve? O que você construiria com ela?" }
+      ],
+      jobs: [
+        { emoji: "💼", en: "What do you want to be when you grow up?", pt: "O que você quer ser quando crescer?" },
+        { emoji: "🦸", en: "If you could have any job in the world for one day, what would it be?", pt: "Se você pudesse ter qualquer trabalho do mundo por um dia, qual seria?" },
+        { emoji: "🏫", en: "What is the coolest job someone in your family has?", pt: "Qual é o trabalho mais legal que alguém da sua família tem?" }
+      ],
+      school: [
+        { emoji: "🎒", en: "What is your favorite subject to learn at school?", pt: "Qual é a sua matéria favorita de aprender na escola?" },
+        { emoji: "🖍️", en: "What school supplies do you like buying the most?", pt: "Quais materiais escolares você mais gosta de comprar?" },
+        { emoji: "⚽", en: "What is your favorite thing to do during school break?", pt: "Qual é a sua coisa favorita para fazer durante o intervalo da escola?" }
+      ],
+      feelings: [
+        { emoji: "😊", en: "What is something that always makes you feel happy?", pt: "O que é algo que sempre faz você se sentir feliz?" },
+        { emoji: "😴", en: "What do you do when you feel tired or bored?", pt: "O que você faz quando se sente cansado ou entediado?" },
+        { emoji: "💪", en: "When was the last time you felt really proud of yourself?", pt: "Quando foi a última vez que você se sentiu muito orgulhoso de si mesmo?" }
+      ],
+      cinema: [
+        { emoji: "🍿", en: "What is your favorite movie of all time?", pt: "Qual é o seu filme favorito de todos os tempos?" },
+        { emoji: "🎬", en: "Do you prefer watching movies at home or at the cinema?", pt: "Você prefere assistir filmes em casa ou no cinema?" },
+        { emoji: "🦸", en: "If you could be any movie character, who would you be?", pt: "Se você pudesse ser qualquer personagem de filme, quem seria?" }
+      ],
+      restaurant: [
+        { emoji: "🍽️", en: "What is your favorite dish to order at a restaurant?", pt: "Qual é o seu prato favorito para pedir em um restaurante?" },
+        { emoji: "🍰", en: "Do you always save room for dessert?", pt: "Você sempre guarda um espacinho para a sobremesa?" },
+        { emoji: "🍔", en: "What is the best restaurant you have ever been to?", pt: "Qual é o melhor restaurante que você já foi?" }
+      ],
+      parks: [
+        { emoji: "🌳", en: "What is your favorite thing to do at the park?", pt: "Qual é a sua coisa favorita para fazer no parque?" },
+        { emoji: "🚲", en: "Do you like riding a bike or playing on the swings?", pt: "Você gosta de andar de bicicleta ou brincar no balanço?" },
+        { emoji: "🧺", en: "Have you ever had a picnic? What did you eat?", pt: "Você já fez um piquenique? O que você comeu?" }
+      ],
+      "body-parts": [
+        { emoji: "👁️", en: "What is your favorite feature about yourself?", pt: "Qual é a sua característica favorita em você mesmo?" },
+        { emoji: "🦵", en: "What is your favorite sport or physical activity?", pt: "Qual é o seu esporte ou atividade física favorita?" },
+        { emoji: "💪", en: "What do you do to keep your body healthy and strong?", pt: "O que você faz para manter seu corpo saudável e forte?" }
+      ]
+    };
+
+    const questionsList = scenarioQuestions[scenario.slug] || [
+      { emoji: "🗣️", en: "What do you like most about this topic?", pt: "O que você mais gosta sobre esse assunto?" }
     ];
-    return scenario.vocabulary.map((v, i) => {
-      const fn = prompts[i % prompts.length];
-      return fn(v);
-    }).sort(() => Math.random() - 0.5);
+    
+    return [...questionsList].sort(() => Math.random() - 0.5);
   });
   const [qIndex, setQIndex] = useState(0);
   const [showPt, setShowPt] = useState(false);
@@ -720,18 +782,6 @@ function TellMeTab({ scenario }: { scenario: ScenarioData }) {
         }}
       >
         <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>{q.emoji}</div>
-        <div
-          style={{
-            fontSize: "0.85rem",
-            fontWeight: 600,
-            color: "var(--accent-secondary)",
-            textTransform: "uppercase",
-            letterSpacing: "1px",
-            marginBottom: "0.5rem",
-          }}
-        >
-          💬 Tell Me...
-        </div>
         <div
           style={{
             fontSize: "1.3rem",
@@ -795,37 +845,9 @@ function FindMistakeTab({ scenario }: { scenario: ScenarioData }) {
       pool.push(...scenario.findMistakeQuestions);
     }
 
-    // 2. Dynamic mistake generators to ensure at least 15 items
-    const vocab = [...scenario.vocabulary];
-    vocab.forEach((v, i) => {
-      const wrong = vocab[(i + 3) % vocab.length];
-      const wrong2 = vocab[(i + 5) % vocab.length];
-
-      pool.push({
-        emoji: v.emoji,
-        wrongEn: `I can use a "${v.word}" as a "${wrong.word}".`,
-        correctEn: `No! A "${v.word}" (${v.pt}) cannot be used as a "${wrong.word}" (${wrong.pt}).`,
-        pt: `Mistura incorreta: ${v.word} não é ${wrong.word}!`,
-      });
-
-      pool.push({
-        emoji: v.emoji,
-        wrongEn: `In English, the word "${v.word}" means "${wrong2.pt}" in Portuguese.`,
-        correctEn: `No! "${v.word}" actually translates to "${v.pt}", not "${wrong2.pt}".`,
-        pt: `Tradução incorreta: "${v.word}" significa "${v.pt}"!`,
-      });
-
-      if (v.word.length >= 3) {
-        const wrongLetter = String.fromCharCode(((v.word.charCodeAt(0) - 65 + 6) % 26) + 65);
-        pool.push({
-          emoji: v.emoji,
-          wrongEn: `The English word "${v.word}" starts with the letter '${wrongLetter}'.`,
-          correctEn: `No! "${v.word}" begins with '${v.word[0].toUpperCase()}', not '${wrongLetter}'.`,
-          pt: `Letra inicial incorreta: "${v.word}" começa com '${v.word[0].toUpperCase()}'.`,
-        });
-      }
-    });
-
+    // The user requested that we only use contextual A1.2 sentences
+    // and avoid simple translation or spelling questions like "Word X means Y in Portuguese".
+    // Therefore, we solely rely on the manually curated findMistakeQuestions from scenario data.
     // Shuffle and pick 15 questions
     const targetCount = Math.min(15, pool.length);
     const selected = pool.sort(() => Math.random() - 0.5).slice(0, targetCount);
@@ -1359,50 +1381,11 @@ function TrueOrFalseTab({ scenario }: { scenario: ScenarioData }) {
 
   const initGame = useCallback(() => {
     const qs: { statement: string; statementPt: string; correct: boolean; explanation?: string }[] = [];
-    const vocab = [...scenario.vocabulary].sort(() => Math.random() - 0.5);
 
-    // 1. Generate A2 Vocabulary & Sentence Structure Questions
-    vocab.forEach((v, i) => {
-      // Question 1: Translation/Meaning
-      if (i % 2 === 0) {
-        qs.push({
-          statement: `In English, the word "${v.word}" corresponds to "${v.pt}" in Portuguese.`,
-          statementPt: `Em inglês, a palavra "${v.word}" corresponde a "${v.pt}" em português.`,
-          correct: true,
-          explanation: `Correct! "${v.word}" means "${v.pt}".`,
-        });
-      } else {
-        const wrongV = vocab[(i + 2) % vocab.length];
-        qs.push({
-          statement: `In English, the word "${v.word}" corresponds to "${wrongV.pt}" in Portuguese.`,
-          statementPt: `Em inglês, a palavra "${v.word}" corresponde a "${wrongV.pt}" em português.`,
-          correct: false,
-          explanation: `False! "${v.word}" means "${v.pt}", while "${wrongV.word}" means "${wrongV.pt}".`,
-        });
-      }
-
-      // Question 2: Spelling/Letter
-      if (v.word.length >= 3) {
-        if (i % 3 === 0) {
-          qs.push({
-            statement: `The English word "${v.word}" begins with the letter '${v.word[0].toUpperCase()}'.`,
-            statementPt: `A palavra em inglês "${v.word}" começa com a letra '${v.word[0].toUpperCase()}'.`,
-            correct: true,
-            explanation: `Correct! "${v.word}" begins with '${v.word[0].toUpperCase()}'.`,
-          });
-        } else if (i % 3 === 1) {
-          const wrongLetter = String.fromCharCode(((v.word.charCodeAt(0) - 65 + 7) % 26) + 65);
-          qs.push({
-            statement: `The English word "${v.word}" begins with the letter '${wrongLetter}'.`,
-            statementPt: `A palavra em inglês "${v.word}" começa com a letra '${wrongLetter}'.`,
-            correct: false,
-            explanation: `False! "${v.word}" begins with '${v.word[0].toUpperCase()}', not '${wrongLetter}'.`,
-          });
-        }
-      }
-    });
-
-    // 2. Add scenario-specific A2 context questions if available
+    // The user requested that we only use contextual A1.2 sentences
+    // and avoid simple translation or spelling True/False questions like "Word X means Y in Portuguese".
+    // Therefore, we solely repurpose the manually curated findMistakeQuestions for the True/False game.
+    // 2. Add scenario-specific A1.2 context questions if available
     if (scenario.findMistakeQuestions && scenario.findMistakeQuestions.length > 0) {
       scenario.findMistakeQuestions.forEach((fm, idx) => {
         if (idx % 2 === 0) {
